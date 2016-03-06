@@ -127,7 +127,7 @@ class Clause {
         unsigned has_extra : 1;
         unsigned reloced   : 1;
         unsigned size      : 27;
-	}                            header;//EDIT: ADD A HEADER TO CHECK IF THE CLAUSE HAS ONLY 2 UNASSIGNED LITERALS
+	}                            header;
     union { Lit lit; float act; uint32_t abs; CRef rel; } data[0];
 
     friend class ClauseAllocator;
@@ -140,7 +140,6 @@ class Clause {
         header.has_extra = use_extra;
         header.reloced   = 0;
         header.size      = ps.size();
-	header.nbhead    = false;
 
         for (int i = 0; i < ps.size(); i++) 
             data[i].lit = ps[i];

@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include <math.h>
-#include "../mtl/Vec.h" //EDIT: INCLUDING THIS TO ACCESS THE FUNCTION LAST() TO GET LAST ADDED CLAUSE TO CLAUSEQ
+#include "../mtl/Vec.h" 
 #include "../mtl/Sort.h"
 #include "Solver.h"
 
@@ -126,7 +126,7 @@ Var Solver::newVar(bool sign, bool dvar)
     trail    .capacity(v+1);
     setDecisionVar(v, dvar);
 
-//EDIT 2 : Initialise clauseq, lit_ac, nb_two
+//EDIT 2 : Initialise clauseq, lit_ac, nb_one
     lit_ac   .push(0);
     lit_ac   .push(0);
     nb_one   .push(0);
@@ -261,8 +261,7 @@ Lit Solver::pickBranchLit()
 
 //EDIT 4 : FIND MOST RECENT CLAUSE AND THEN MAKE NEXT = HIGHEST ACTIVITY VARIABLE IN THE CLAUSE
 	bool inlearnts=false;
-    int z;
-         //printf("clause number %d\t%d\n",clauseq.size(),(nClauses()+nLearnts()));	
+        int z;
 	for(z=learnts.size()-1;z>=0;)
     {
 		if(satisfied(ca[learnts[z]]))
@@ -541,14 +540,6 @@ void Solver::uncheckedEnqueue(Lit p, CRef from)
     trail.push_(p);
 }
 
-/*//EDIT: A SEPARATE FUNCTION TO ENSURE THAT WHATEVER LIT IS SENT IS ALWAYS MADE TRUE
-void Solver::uncheckedEnqueue2(Lit p, CRef from)
-{
-    assert(value(p) == l_Undef);
-    assigns[var(p)] = lbool(sign(p));
-    vardata[var(p)] = mkVarData(from, decisionLevel());
-    trail.push_(~p); //always push the negative literal so that the literal is assigned true.
-}*/
 
 
 /*_________________________________________________________________________________________________
@@ -877,7 +868,7 @@ lbool Solver::search(int nof_conflicts)
 
             // Increase decision level and enqueue 'next'
             newDecisionLevel();
-            uncheckedEnqueue(~next);  //EDIT: UNCHECKEDENQUEUE HAS BEEN CHANGED TO ENSURE THAT WHATEVER LITERAL IS SENT IS ALWAYS ASSIGNED 
+            uncheckedEnqueue(~next);  //EDIT: PARAMETER INPUT TO UNCHECKEDENQUEUE HAS BEEN CHANGED TO ENSURE THAT WHATEVER LITERAL IS SENT IS ALWAYS ASSIGNED TRUE
         }
     }
 }
