@@ -28,7 +28,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "../utils/Options.h"
 #include "Dimacs.h"
 #include "Solver.h"
-
+#define printcompstats
 using namespace Minisat;
 
 //=================================================================================================
@@ -45,9 +45,16 @@ void printStats(Solver& solver)
     printf("conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", solver.tot_literals, (solver.max_literals - solver.tot_literals)*100 / (double)solver.max_literals);
     if (mem_used != 0) printf("Memory used           : %.2f MB\n", mem_used);
     printf("CPU time              : %g s\n", cpu_time);
-
 }
-
+void printgraph(Solver& solver)
+{
+ printf("%.4f\t",cpuTime());
+ printf("%.2f\t",memUsedPeak());
+ printf("%"PRIu64"\t",solver.conflicts);
+ printf("%"PRIu64"\t",solver.starts);
+ printf("%"PRIu64"\t",solver.decisions);
+ printf("%"PRIu64"\t",solver.propagations);
+}
 
 static Solver* solver;
 // Terminate by notifying the solver and back out gracefully. This is mainly to have a test-case
@@ -60,7 +67,9 @@ static void SIGINT_interrupt(int signum) { solver->interrupt(); }
 static void SIGINT_exit(int signum) {
     printf("\n"); printf("*** INTERRUPTED ***\n");
     if (solver->verbosity > 0){
-        printStats(*solver);
+	#ifdef printcompstats        
+	printgraph(*solver);
+        #endif
         printf("\n"); printf("*** INTERRUPTED ***\n"); }
     _exit(1); }
 
@@ -148,24 +157,34 @@ int main(int argc, char** argv)
         // voluntarily:
         signal(SIGINT, SIGINT_interrupt);
         signal(SIGXCPU,SIGINT_interrupt);
-       
+	
         if (!S.simplify()){
             if (res != NULL) fprintf(res, "UNSAT\n"), fclose(res);
             if (S.verbosity > 0){
                 printf("===============================================================================\n");
                 printf("Solved by unit propagation\n");
                 printStats(S);
-                printf("\n"); }
-            printf("UNSATISFIABLE\n");
+		printf("\n"); 
+	}
+	    #ifdef printcompstats
+	    printgraph(S);
+            #endif
+	    printf("UNSATISFIABLE\n");
             exit(20);
         }
         
+
         vec<Lit> dummy;
         lbool ret = S.solveLimited(dummy);
         if (S.verbosity > 0){
             printStats(S);
-            printf("\n"); }
-        printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+	    printf("\n"); 
+	}
+	#ifdef printcompstats
+	printgraph(S);
+	#endif
+
+	printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
         if (res != NULL){
             if (ret == l_True){
                 fprintf(res, "SAT\n");
